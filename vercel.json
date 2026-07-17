@@ -3,6 +3,10 @@
   "rewrites": [
     { "source": "/api/events", "destination": "/api/events.js" },
     { "source": "/api/official", "destination": "/api/official.js" },
+    { "source": "/api/cron", "destination": "/api/cron.js" },
     { "source": "/(.*)", "destination": "/public/$1" }
+  ],
+  "crons": [
+    { "path": "/api/cron", "schedule": "0 23 * * *" }
   ]
 }

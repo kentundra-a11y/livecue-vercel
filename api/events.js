@@ -69,7 +69,8 @@ export default async function handler(req, res) {
     const body = await response.json();
     if (!response.ok) return res.status(response.status).json({ error: 'Ticketmaster request failed', details: body });
     const raw = body?._embedded?.events || [];
-    const events = raw.map(event => normalizeEvent(event, artist));
+    const todayJst = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const events = raw.map(event => normalizeEvent(event, artist)).filter(event => !event.liveDate || event.liveDate >= todayJst);
     return res.status(200).json({ artist, count: events.length, events, checkedAt: new Date().toISOString() });
   } catch (error) {
     return res.status(500).json({ error: 'Could not fetch events', message: error.message });

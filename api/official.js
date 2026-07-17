@@ -149,7 +149,7 @@ async function parseLinkedNews(source, headers) {
       if (!isSaleContext(body)) return null;
       const headings = $('h1,h2,h3').map((_, heading) => clean($(heading).text())).get().filter(text => text && !/^(NEWS|LIVE|Bialystocks)$/i.test(text));
       const title = headings[0] || clean(body.replace(/^20\d{2}\.\d{1,2}\.\d{1,2}\s*/, '').slice(0, 100));
-      return makeEvent(source, title, body, url, 100 + index);
+      return { ...makeEvent(source, title, body, url, 100 + index), isNews: true, liveDate: '' };
     }));
     return pages.filter(item => item.status === 'fulfilled' && item.value).map(item => item.value);
   } catch {
@@ -157,11 +157,20 @@ async function parseLinkedNews(source, headers) {
   }
 }
 
-export default async function handler(req, res) {
-  res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=900');
-  if (req.method !== 'GET') return res.status(405).json({ error: 'GET only' });
-  const source = sourceFor(req.query.artist);
-  if (!source) return res.status(200).json({ artist: clean(req.query.artist), count: 0, events: [], supported: false });
+function futureOnly(events) {
+  const now = Date.now();
+  const todayJst = new Date(now + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  return events.filter(event => {
+    const saleUntil = Date.parse(event.saleEndDate || event.saleDate || '');
+    if (event.isNews) return !Number.isNaN(saleUntil) && saleUntil >= now;
+    if (event.liveDate && event.liveDate >= todayJst) return true;
+    return !Number.isNaN(saleUntil) && saleUntil >= now;
+  });
+}
+
+export async function getOfficialEvents(artistName) {
+  const source = sourceFor(artistName);
+  if (!source) return { artist: clean(artistName), count: 0, events: [], supported: false };
 
   try {
     const headers = {
@@ -177,10 +186,11 @@ export default async function handler(req, res) {
     let events = source.kind === 'quruli' ? parseQuruli($, source) : parseGeneric($, source);
     if (!events.length) events = parseGeneric($, source);
     events.push(...await parseLinkedNews(source, headers));
-    events = events.filter((event, index, array) => array.findIndex(item => item.title === event.title && item.liveDate === event.liveDate) === index).slice(0, 20);
-    return res.status(200).json({ artist: source.artist, count: events.length, events, supported: true, officialUrl: source.url, checkedAt: new Date().toISOString() });
+    events = events.filter((event, index, array) => array.findIndex(item => item.title === event.title && item.liveDate === event.liveDate) === index);
+    events = futureOnly(events).slice(0, 20);
+    return { artist: source.artist, count: events.length, events, supported: true, officialUrl: source.url, checkedAt: new Date().toISOString() };
   } catch (error) {
-    return res.status(200).json({
+    return {
       artist: source.artist,
       count: 0,
       events: [],
@@ -188,6 +198,12 @@ export default async function handler(req, res) {
       officialUrl: source.url,
       warning: error.message,
       checkedAt: new Date().toISOString()
-    });
+    };
   }
+}
+
+export default async function handler(req, res) {
+  res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=900');
+  if (req.method !== 'GET') return res.status(405).json({ error: 'GET only' });
+  return res.status(200).json(await getOfficialEvents(req.query.artist));
 }
