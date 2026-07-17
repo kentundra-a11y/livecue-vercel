@@ -1,10 +1,13 @@
 {
-  "name": "livecue-phase2",
-  "version": "2.0.0",
+  "name": "livecue-phase3-japan",
+  "version": "3.0.0",
   "private": true,
   "scripts": {
     "dev": "vercel dev",
     "start": "vercel dev"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0"
   },
   "devDependencies": {
     "vercel": "latest"

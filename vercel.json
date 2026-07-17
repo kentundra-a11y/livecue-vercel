@@ -2,6 +2,7 @@
   "version": 2,
   "rewrites": [
     { "source": "/api/events", "destination": "/api/events.js" },
+    { "source": "/api/official", "destination": "/api/official.js" },
     { "source": "/(.*)", "destination": "/public/$1" }
   ]
 }
