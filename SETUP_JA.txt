@@ -1,0 +1,13 @@
+LiveCue Phase 2
+
+この版は、公開URLをChromeで開き「実データを更新」を押して使う構成です。
+APIキーを安全に保存するため、HTML単体のダブルクリックでは動きません。
+
+必要な設定
+1. Ticketmaster Developer PortalでAPIキーを取得
+2. GitHubにこのフォルダをアップロード
+3. VercelにImport
+4. 環境変数 TICKETMASTER_API_KEY を登録
+5. Deploy
+
+詳しくは README.md をご覧ください。

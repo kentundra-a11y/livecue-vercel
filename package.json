@@ -1,0 +1,12 @@
+{
+  "name": "livecue-phase2",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "vercel dev"
+  },
+  "devDependencies": {
+    "vercel": "latest"
+  }
+}

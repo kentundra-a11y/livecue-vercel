@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "public": true,
+  "rewrites": [
+    { "source": "/api/events", "destination": "/api/events.js" },
+    { "source": "/(.*)", "destination": "/public/$1" }
+  ]
+}
