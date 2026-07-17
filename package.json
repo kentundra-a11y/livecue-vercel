@@ -1,7 +1,8 @@
 {
-  "name": "livecue-phase3-japan",
-  "version": "3.0.0",
+  "name": "livecue-phase4-alerts",
+  "version": "4.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "vercel dev",
     "start": "vercel dev"
